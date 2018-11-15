@@ -8,7 +8,6 @@
 
 KNATIVE_BUILD_VERSION=v0.2.0
 KNATIVE_SERVING_VERSION=v0.2.1
-KNATIVE_EVENTING_VERSION=v0.0.0-80860ba
 
 set -x
 
@@ -64,9 +63,8 @@ oc apply -f "$DIR/../../knative-operators.catalogsource.yaml"
 # for now, we must install the operators in specific namespaces, so...
 oc create ns knative-build
 oc create ns knative-serving
-oc create ns knative-eventing
 
-# install the operators for build, serving, and eventing
+# install the operators for build, serving
 cat <<EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
@@ -91,22 +89,9 @@ spec:
   name: knative-serving
   startingCSV: knative-serving.${KNATIVE_SERVING_VERSION}
   channel: alpha
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: knative-eventing-subscription
-  generateName: knative-eventing-
-  namespace: knative-eventing
-spec:
-  source: knative-operators
-  name: knative-eventing
-  startingCSV: knative-eventing.${KNATIVE_EVENTING_VERSION}
-  channel: alpha
 EOF
 
 wait_for_all_pods knative-build
 wait_for_all_pods knative-serving
-wait_for_all_pods knative-eventing
 
 oc get pods --all-namespaces
